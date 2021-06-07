@@ -7,7 +7,8 @@ function setup() {
     print(theDiary[50].content);
 
     for(let i =0;i<theDiary.length;i++){
-        let _textBox = new textBox(theDiary[i].date , theDiary[i].content, 600, 420+240*i);
+        //let _textBox = new textBox(theDiary[i].date , theDiary[i].content, 600, 420+240*i);
+        let _textBox = new textBox(theDiary[i].date , theDiary[i].content, 510*i, margin*4);
         textBoxes.push(_textBox);
     }
 
@@ -16,14 +17,20 @@ function setup() {
 }
   
 function draw() {
-    background(220);
+    background(outerBg);
     // square.display();
     push();
-    translate(0, wheeler*-1);
+    translate(wheelIndex*-1,0);
     for(let i =0;i<theDiary.length;i++){
         textBoxes[i].display();
     }
     pop();
+
+    InterFace();
+
+    weather(width-margin*4,margin*3);
+    wheelControl();
+    bgColor();
 }
 
 let result;
@@ -81,12 +88,12 @@ class textBox {
         this.x = _x;
         this.y = _y;
         this.wdith = 510;
-        this.height = 240;
+        this.height = margin*42;
 
-        this.textX = 300;
-        this.textY = 50;
-        this.textSize = 15;
-        this.textLeading = 15;
+        this.textX = margin*2;
+        this.textY = margin*21;
+        this.textSize = 14.4;
+        this.textLeading = 24;
         this.textWidth = 2;
         this.textHeight = 30;
 
@@ -111,7 +118,7 @@ class textBox {
 
     display(){
 
-        fill(255);
+        fill(innerBg);
         stroke(0);
         rect(   
             this.x,
@@ -119,21 +126,25 @@ class textBox {
             this.wdith,
             this.height
             );
-
-        select('canvas').elt.style.letterSpacing = "3px";
+        
+        select('canvas').elt.style.letterSpacing = "1.2px"; //字距
+        textLeading(this.textLeading); //行距
         fill(0);
         noStroke();
-        textLeading(this.textLeading);
         textAlign(LEFT, TOP);
-        textSize(this.textSize);
+        textSize(this.textSize*2);
+        //date
         textFont('Playfair Display');
+        this.day = this.date.charAt(9) + this.date.charAt(10);
         text(   
-            this.date,
-            this.x,
-            this.textY + this.y,
+            this.day,
+            this.textX + this.x,
+            this.textY + this.y - margin*4,
         );
+        //content
         textSize(this.textSize);
         textFont('Noto Serif TC');
+        textLeading(this.textLeading); //行距
         text(   
             this.content,
             this.textX + this.x,
@@ -145,10 +156,105 @@ class textBox {
 
 let wheeler =0;
 function mouseWheel(event) {
-    print(wheeler);
+    //print(wheeler);
     wheeler += event.delta;
 }
 let wheelIndex = 0;
+let wheelStep = 2;
 function wheelControl() {
-    wheelIndex = (abs(wheelIndex - wheeler) > 10) ? wheelIndex + (wheeler - wheelIndex)/2 :wheeler;
+    wheelStep = (wheeler - wheelIndex)*0.051;
+    wheelStep = (abs(wheelStep)< 1) ? ceil(wheelStep):wheelStep;
+    wheelIndex = (abs(wheelIndex - wheeler) > 1) ? wheelIndex + wheelStep :wheeler;
+    //print(wheelIndex);
+}
+
+let margin = 18;
+function InterFace(){
+    fill(innerBg);
+    stroke(0);
+    strokeWeight(1);
+    line(
+        margin,
+        margin,
+        width-margin,
+        margin
+        );
+    line(
+        margin,
+        margin*51,
+        width - margin,
+        margin*51,
+        );
+    line(
+        margin,
+        margin,
+        margin,
+        margin*51,
+        );
+    line(
+        width-margin,
+        margin,
+        width - margin,
+        margin*51,
+        );
+    
+    rect(
+        margin,
+        margin,
+        width-margin*2,
+        margin*3
+        );
+    /*
+    rect(
+        margin,
+        margin*4,
+        margin,
+        margin*42
+        );
+    rect(
+        width - margin*2,
+        margin*4,
+        margin,
+        margin*42
+        );
+    */
+    rect(
+        margin,
+        margin*46,
+        width-margin*2,
+        margin*5
+        );
+    
+    noStroke();
+    fill(outerBg);    
+    rect(
+        0,
+        margin*4,
+        margin,
+        margin*42+1
+        );
+    rect(
+        width - margin+1,
+        margin*4,
+        margin,
+        margin*42+1
+        );
+}
+
+let weatherText = ['🌤','🌥','🌦','☁','🌧','⛈','🌩','☀','🌨'];
+function weather(_x,_y){
+    fill(0);
+    textSize(30);
+    let _weatherIndex = floor(wheeler/2100)%weatherText.length;
+    //print(_weatherIndex);
+    text(weatherText[_weatherIndex],_x,_y);
+}
+
+let innerBg = 220;
+let outerBg = 180;
+function bgColor(){
+    let n = noise(frameCount/120) * 30;
+    innerBg = 220 + n;
+    outerBg = 180 + n;
+    //print(innerBg);
 }
